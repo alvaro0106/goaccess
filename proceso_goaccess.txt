@@ -1,0 +1,32 @@
+#Informacion equipo
+lsb_release -a ; getconfig LONG_BIT ; hostname -I ; hostname
+
+#Install Nginx
+sudo apt-get install nginx -y
+
+
+#Iniciando Nginx
+systemctl start nginx ; systemctl enable nginx
+http://localhost
+
+#instalar Goacces
+echo "deb http://deb.goacces.io/ $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list.d/goaccess.list
+wget -O - https://deb.goaccess.io/gnugpg.key | sudo apt-key add -
+sudo apt-get update ; apt-get install goaccess -y
+goaccess -V
+
+#Goaccess Config Path
+sudo gdit /etc/goaccess.conf &>/dev/null
+
+cd /var/log/nginx
+goaccess access.log --log-format=COMBINED
+
+#HTML Report (Web Interface):-
+goaccess access.log --log-format=COMBINED -a -o report.html
+mv report.html /var/www/html/
+http://localhost/report.html
+rm -rf /var/www/html/report.html
+
+#Generate real-time HTML report
+goaccess access.log --log-format=COMBINED -o /var/www/html/report.html --real-time-html
+http://localhost/report.html
